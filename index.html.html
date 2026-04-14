@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RTV AGD - Mega Store</title>
+    <style>
+        :root {
+            --primary: #00ff41;
+            --bg: #0f0f0f;
+            --card-bg: #1a1a1a;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            color: #ffffff;
+            scroll-behavior: smooth;
+        }
+
+        /* NAGŁÓWEK */
+        header {
+            background: #1a1a1a;
+            padding: 30px;
+            text-align: center;
+            border-bottom: 3px solid var(--primary);
+        }
+
+        /* MENU */
+        nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            background: #1a1a1a;
+            padding: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+        }
+
+        nav a {
+            color: #ccc;
+            text-decoration: none;
+            padding: 8px 15px;
+            font-weight: bold;
+            transition: 0.3s;
+            font-size: 0.9em;
+        }
+
+        nav a:hover { color: var(--primary); }
+
+        /* IKONA KOSZYKA */
+        .cart-icon-container {
+            position: fixed;
+            top: 20px;
+            right: 30px;
+            z-index: 1100;
+            cursor: pointer;
+            background: var(--primary);
+            padding: 10px 20px;
+            border-radius: 50px;
+            color: black;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.4);
+            transition: 0.3s;
+        }
+
+        /* MODAL KOSZYKA */
+        #cart-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            border: 2px solid var(--primary);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        /* PRODUKTY */
+        .container { max-width: 1300px; margin: auto; padding: 20px; }
+        
+        h2 {
+            color: var(--primary);
+            text-transform: uppercase;
+            border-left: 5px solid var(--primary);
+            padding-left: 15px;
+            margin-top: 60px;
+            background: rgba(0, 255, 65, 0.05);
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .product-card {
+            background: var(--card-bg);
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .product-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .price {
+            font-size: 1.4em;
+            color: var(--primary);
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        .old-price {
+            text-decoration: line-through;
+            color: #777;
+            font-size: 0.9em;
+        }
+
+        button {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            transition: 0.3s;
+        }
+
+        button:hover { background: #00cc33; }
+        .close-btn { background: #ff4444; color: white; margin-top: 20px; }
+
+        #kontakt {
+            background: #1a1a1a;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 60px;
+            border: 2px solid var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+<div class="cart-icon-container" onclick="toggleCart()">
+    🛒 KOSZYK (<span id="cart-count">0</span>)
+</div>
+
+<div id="cart-modal">
+    <div class="modal-content">
+        <h2>Twój Koszyk</h2>
+        <div id="cart-items-list"></div>
+        <div style="margin-top: 20px; font-size: 1.3em; border-top: 1px solid var(--primary); padding-top: 10px;">
+            <strong>Łącznie: <span id="cart-total">0</span> zł</strong>
+        </div>
+        <button onclick="toggleCart()" class="close-btn">Wróć do zakupów</button>
+        <button style="margin-top: 10px;" onclick="alert('Dziękujemy za zamówienie!')">Finalizuj transakcję</button>
+    </div>
+</div>
+
+<header>
+    <h1>RTV AGD - PROFESJONALNY SKLEP DLA GRACZY</h1>
+</header>
+
+<nav>
+    <a href="#komputery">Komputery</a>
+    <a href="#laptopy">Laptopy</a>
+    <a href="#monitory">Monitory</a>
+    <a href="#telefony">Telefony</a>
+    <a href="#tablety">Tablety</a>
+    <a href="#akcesoria">Akcesoria</a>
+    <a href="#rabaty">Rabaty -30%</a>
+    <a href="#kontakt">Kontakt</a>
+</nav>
+
+<div class="container">
+
+    <section id="komputery">
+        <h2>Komputery Stacjonarne</h2>
+        <div class="grid">
+            <div class="product-card">
+                <img src="https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=400" alt="PC">
+                <h3>Gamer Ultra X1</h3>
+                <p>i7-14700K, RTX 4070 Ti</p>
+                <p class="price">7499 zł</p>
+                <button onclick="addToCart('Gamer Ultra X1', 7499)">Dodaj do koszyka</button>
+            </div>
+            <div class="product-card">
+                <img src="https://images.unsplash.com/photo-1593640408182-31c70c8268f5?w=400" alt="PC">
+                <h3>Night Hunter V2</h3>
+                <p>Ryzen 7, RTX 4060</p>
+                <p class="price">4899 zł</p>
+                <button onclick="addToCart('Night Hunter V2', 4899)">Dodaj do koszyka</button>
+            </div>
+            <div class="product-card">
+                <img src="https://m.media-amazon.com/images/I/71P2K5qWhtL._AC_SL1500_.jpg" alt="PC">
+                <h3>Work & Play Pro</h3>
+                <p>i5-13400, RTX 3060</p>
+                <p class="price">3599 zł</p>
+                <button onclick="addToCart('Work & Play Pro', 3599)">Dodaj do koszyka</button>
+            </div>
+            <div class="product-card">
+                <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400" alt="PC">
+                <h3>Titan Omega</h3>
+                <p>i9-14900K, RTX 4090</p>
+                <p class="price">15999 zł</p>
+                <button onclick="addToCart('Titan Omega', 15999)">Dodaj do koszyka</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="laptopy">
+        <h2>Laptopy Gamingowe</h2>
+        <div class="grid">
+            <div class="product-card">
+                <img src="https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=400" alt="Lap">
+                <h3>Nitro Speed V15</h3>
+                <p class="price">4299 zł</p>
+                <button onclick="addToCart('Nitro Speed V15', 4299)">Dodaj do koszyka</button>
+            </div>
+            <div class="product-card">
+                <img src="https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=400" alt="Lap">
+                <h3>Predator Beast</h3>
+                <p class="price">8150 zł</p>
+                <button onclick="addToCart('Predator Beast', 8150)">Dodaj do koszyka</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="monitory">
+        <h2>Monitory</h2>
+        <div class="grid">
+            <div class="product-card">
+                <img src="https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=400" alt="Mon">
+                <h3>Samsung Odyssey G5</h3>
+                <p class="price">1299 zł</p>
+                <button onclick="addToCart('Samsung Odyssey G5', 1299)">Dodaj do koszyka</button>
+            </div>
+            <div class="product-card">
+                <img src="https://images.unsplash.com/photo-1552308995-2baac1ad5490?w=400" alt="Mon">
+                <h3>LG UltraGear 4K</h3>
+                <p class="price">2800 zł</p>
+                <button onclick="addToCart('LG UltraGear 4K', 2800)">Dodaj do koszyka</button>
+            </div>
+            <div class="product-card">
+                <img src="https://m.media-amazon.com/images/I/71PI35Tp0YL._AC_SY300_SX300_QL70_ML2_.jpg" alt="Mon">
+                <h3>Alienware OLED</h3>
+                <p class="price">4199 zł</p>
+                <button onclick="addToCart('Alienware OLED', 4199)">Dodaj do koszyka</button>
+            </div>
+            <div class="product-card">
+                <img src="https://images.unsplash.com/photo-1542751110-97427bbecf20?w=400" alt="Mon">
+                <h3>AOC Gaming Lite</h3>
+                <p class="price">549 zł</p>
+                <button onclick="addToCart('AOC Gaming Lite', 549)">Dodaj do koszyka</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="telefony">
+        <h2>Smartfony</h2>
+        <div class="grid">
+            <div class="product-card">
+                <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400" alt="Tel">
+                <h3>iPhone 15 Pro</h3>
+                <p class="price">4999 zł</p>
+                <button onclick="addToCart('iPhone 15 Pro', 4999)">Dodaj do koszyka</button>
+            </div>
+            <div class="product-card">
+                <img src="https://m.media-amazon.com/images/I/71XJeViE8rL._AC_SX679_.jpg" alt="Tel">
+                <h3>Samsung S24 Ultra</h3>
+                <p class="price">5200 zł</p>
+                <button onclick="addToCart('Samsung S24 Ultra', 5200)">Dodaj do koszyka</button>
+            </div>
+            <div class="product-card">
+                <img src="https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400" alt="Tel">
+                <h3>Xiaomi 14</h3>
+                <p class="price">3499 zł</p>
+                <button onclick="addToCart('Xiaomi 14', 3499)">Dodaj do koszyka</button>
+            </div>
+            <div class="product-card">
+                <img src="https://images.unsplash.com/photo-1533228100845-08145b01de14?w=400" alt="Tel">
+                <h3>Google Pixel 8</h3>
+                <p class="price">2999 zł</p>
+                <button onclick="addToCart('Google Pixel 8', 2999)">Dodaj do koszyka</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="tablety">
+        <h2>Tablety</h2>
+        <div class="grid">
+            <div class="product-card">
+                <img src="data:image/webp;base64,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" alt="Tab">
+                <h3>iPad Air M2</h3>
+                <p class="price">2999 zł</p>
+                <button onclick="addToCart('iPad Air M2', 2999)">Dodaj do koszyka</button>
+            </div>
+            <div class="product-card">
+                <img src="https://m.media-amazon.com/images/I/41i2Qh1isjL._AC_SX300_SY300_QL70_ML2_.jpg" alt="Tab">
+                <h3>Samsung Tab S9</h3>
+                <p class="price">3200 zł</p>
+                <button onclick="addToCart('Samsung Tab S9', 3200)">Dodaj do koszyka</button>
+            </div>
+            <div class="product-card">
+                <img src="https://images.unsplash.com/photo-1561154464-82e9adf32764?w=400" alt="Tab">
+                <h3>Lenovo Tab P11</h3>
+                <p class="price">1199 zł</p>
+                <button onclick="addToCart('Lenovo Tab P11', 1199)">Dodaj do koszyka</button>
+            </div>
+            <div class="product-card">
+                <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400" alt="Tab">
+                <h3>iPad Mini 6</h3>
+                <p class="price">2499 zł</p>
+                <button onclick="addToCart('iPad Mini 6', 2499)">Dodaj do koszyka</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="rabaty">
+        <h2>Okazje -30%</h2>
+        <div class="grid">
+            <div class="product-card">
+                <img src="https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=400" alt="TV">
+                <h3>TV Gaming 55"</h3>
+                <p class="old-price">3500 zł</p>
+                <p class="price">2450 zł</p>
+                <button onclick="addToCart('TV Gaming 55', 2450)">Dodaj do koszyka</button>
+            </div>
+            <div class="product-card">
+                <img src="https://images.unsplash.com/photo-1551028150-64b9f398f678?w=400" alt="Fotel">
+                <h3>Fotel X-Ray</h3>
+                <p class="old-price">1200 zł</p>
+                <p class="price">840 zł</p>
+                <button onclick="addToCart('Fotel X-Ray', 840)">Dodaj do koszyka</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="kontakt">
+        <h2>Kontakt</h2>
+        <p style="font-size: 2.2em; color: var(--primary); font-weight: bold;">📞 +48 123 456 789</p>
+        <p>Email: biuro@rtv-agd.pl | Adres: ul. Gamingowa 1, Warszawa</p>
+    </section>
+</div>
+
+<footer>
+    <p style="text-align: center; color: #666; padding: 40px;">&copy; 2024 RTV AGD - Wszystkie prawa zastrzeżone.</p>
+</footer>
+
+<script>
+    let cart = [];
+    let total = 0;
+
+    function addToCart(name, price) {
+        cart.push({name, price});
+        total += price;
+        updateUI();
+        
+        // Animacja przycisku koszyka
+        const cartBtn = document.querySelector('.cart-icon-container');
+        cartBtn.style.transform = "scale(1.2)";
+        setTimeout(() => cartBtn.style.transform = "scale(1)", 200);
+    }
+
+    function updateUI() {
+        document.getElementById('cart-count').innerText = cart.length;
+        document.getElementById('cart-total').innerText = total;
+        
+        const list = document.getElementById('cart-items-list');
+        list.innerHTML = "";
+        cart.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'cart-item';
+            div.innerHTML = `<span>${item.name}</span><span>${item.price} zł</span>`;
+            list.appendChild(div);
+        });
+    }
+
+    function toggleCart() {
+        const modal = document.getElementById('cart-modal');
+        modal.style.display = (modal.style.display === "flex") ? "none" : "flex";
+    }
+</script>
+
+</body>
+</html>
